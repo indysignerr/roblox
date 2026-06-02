@@ -1,7 +1,8 @@
 --!nonstrict
 -- TeamService: manages team creation, joining, leaving, and role assignment.
 -- Pure decisions are delegated to src/shared/Logic/Team.luau.
--- Persistence note: _teams and _lastLeave are in-memory only (see report).
+-- Persistence note: _teams (rosters) are in-memory only; the per-player leave
+-- cooldown persists on profile.lastTeamLeaveAt. Cross-server rosters are a v2 need.
 
 local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -20,10 +21,6 @@ local TeamService = Knit.CreateService({
 	-- In-memory roster: { [teamId] = Team }
 	-- NOT persisted across server restarts; see report for persistence needs.
 	_teams = {},
-
-	-- In-memory last-leave timestamps: { [userId] = unixTimestamp }
-	-- NOT persisted across server restarts; see report for persistence needs.
-	_lastLeave = {},
 })
 
 local _Data = nil :: any -- DataService, fetched in KnitInit
@@ -134,7 +131,8 @@ function TeamService.Client:Leave(player: Player): boolean
 		return false
 	end
 
-	local lastLeave: number? = self.Server._lastLeave[player.UserId]
+	-- Cooldown timestamp persists on the profile, so it survives rejoin/restart.
+	local lastLeave: number? = profile.lastTeamLeaveAt
 	if not TeamLogic.canLeave(lastLeave, os.time(), GameConfig.team.leaveCooldownHours) then
 		return false
 	end
@@ -152,7 +150,7 @@ function TeamService.Client:Leave(player: Player): boolean
 	end
 
 	profile.teamId = nil
-	self.Server._lastLeave[player.UserId] = os.time()
+	profile.lastTeamLeaveAt = os.time()
 	_Data:FireUpdated(player)
 
 	return true
@@ -232,13 +230,6 @@ end
 
 function TeamService:KnitInit()
 	_Data = Knit.GetService("DataService")
-
-	-- Clean up in-memory state when a player leaves.
-	game:GetService("Players").PlayerRemoving:Connect(function(_player)
-		-- If they are mid-session we do NOT evict them from the team roster;
-		-- their profile.teamId is the source of truth and will persist.
-		-- We only drop the _lastLeave cache entry if they were never in a team.
-	end)
 end
 
 function TeamService:KnitStart() end

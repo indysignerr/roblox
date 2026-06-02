@@ -33,6 +33,7 @@ local PROFILE_TEMPLATE: ProfileData = {
 	teamId = nil,
 	unlockedZones = { spawn = true },
 	lastDailyPackDay = 0,
+	spyCredits = 0,
 	stats = { steals = 0, stolenFrom = 0, fusions = 0, wins = 0 },
 	createdAt = 0,
 }
@@ -90,6 +91,20 @@ function DataService:AddCoins(player: Player, amount: number): boolean
 	return true
 end
 
+-- Delivers coins to a player who may be OFFLINE (persistent + cross-server) using a
+-- ProfileStore message. The recipient credits them via the MessageHandler in _load
+-- the next time their session polls (immediately, if already online).
+-- Used by MarketService to pay sellers whose listing sold while they were away.
+function DataService:SendCoins(userId: number, amount: number): boolean
+	if amount <= 0 then
+		return false
+	end
+	local ok = pcall(function()
+		Store:MessageAsync(`{userId}`, { kind = "coins", amount = amount })
+	end)
+	return ok
+end
+
 function DataService:_load(player: Player)
 	local profile = Store:StartSessionAsync(`{player.UserId}`, {
 		Cancel = function()
@@ -117,6 +132,19 @@ function DataService:_load(player: Player)
 
 	if player.Parent == Players then
 		self._profiles[player] = profile
+		-- Drain any queued cross-session messages (e.g. coins from market sales
+		-- that completed while this player was offline). Delivered in order.
+		profile:MessageHandler(function(message, processed)
+			if
+				type(message) == "table"
+				and message.kind == "coins"
+				and type(message.amount) == "number"
+			then
+				profile.Data.coins += message.amount
+				self:FireUpdated(player)
+			end
+			processed()
+		end)
 		self.ProfileLoaded:Fire(player, profile.Data)
 	else
 		-- Player left before the session finished starting.

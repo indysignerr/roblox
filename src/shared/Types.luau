@@ -40,8 +40,12 @@ export type ProfileData = {
 	shield: ShieldState,
 	streak: StreakState,
 	teamId: string?,
+	-- When the player last left a team (unix seconds); nil = never. Drives the leave cooldown.
+	lastTeamLeaveAt: number?,
 	unlockedZones: { [string]: boolean },
 	lastDailyPackDay: number,
+	-- Server-granted credits for the Robux-gated "spy" reveal (one credit = one reveal).
+	spyCredits: number,
 	stats: {
 		steals: number,
 		stolenFrom: number,

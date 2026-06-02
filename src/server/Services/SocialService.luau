@@ -58,16 +58,18 @@ function SocialService.Client:GetShowcase(_player: Player, targetUserId: number)
 	return Social.topCards(profile.cards, catalogIndex, 5)
 end
 
--- :Spy(player, targetUserId, hasPaid) -> { {cardId: string, count: number} }?
--- Returns nil if hasPaid is false (Robux gate).
--- Otherwise returns the target's full collection as a list of {cardId, count}.
--- Returns nil also if the target is offline.
+-- :Spy(player, targetUserId) -> { {cardId: string, count: number} }?
+-- Robux gate is enforced SERVER-SIDE: the caller must hold a spy credit, which is
+-- only ever granted by PurchaseService via MarketplaceService.ProcessReceipt.
+-- Returns nil if the caller has no credit, or the target is offline. A credit is
+-- consumed only on a successful reveal (so a wasted prompt on an offline target is free).
 function SocialService.Client:Spy(
-	_player: Player,
-	targetUserId: number,
-	hasPaid: boolean
+	player: Player,
+	targetUserId: number
 ): { { cardId: string, count: number } }?
-	if not Social.canSpy(hasPaid) then
+	local me = Data:GetProfile(player)
+	local hasCredit = me ~= nil and (me.spyCredits or 0) > 0
+	if not Social.canSpy(hasCredit) then
 		return nil
 	end
 
@@ -92,6 +94,11 @@ function SocialService.Client:Spy(
 	for cardId, owned in profile.cards do
 		table.insert(summary, { cardId = cardId, count = owned.count })
 	end
+
+	-- Consume one credit now that the reveal succeeded.
+	me.spyCredits -= 1
+	Data:FireUpdated(player)
+
 	return summary
 end
 

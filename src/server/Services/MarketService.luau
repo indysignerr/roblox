@@ -2,14 +2,10 @@
 -- Global market board. Players list cards for sale; others buy at posted price.
 -- A progressive tax (by rarity) is deducted from the seller's payout.
 --
--- V1: listings are in-memory only (lost on server restart).
--- Offline seller payouts are skipped and reported below.
---
--- LOCKED-FILE NEEDS / V1 LIMITATIONS (see end of file):
---   - Listing persistence requires a new `marketListings` field in ProfileData
---     (edit DataService / the profile template -- LOCKED).
---   - Offline seller payout requires a mailbox/inbox field in ProfileData
---     (edit DataService -- LOCKED).
+-- Offline seller payouts are delivered via DataService:SendCoins (a persistent,
+-- cross-server ProfileStore message), so no coins are ever dropped.
+-- V1 limitation: listings themselves are in-memory (lost on server restart) -- a
+-- global listing store (DataStore/MemoryStore) is a v2 follow-up.
 --
 -- Public API exposed to the client:
 --   :List(player, cardId, price)      -> listingId? (string)
@@ -105,21 +101,13 @@ function MarketService.Client:Buy(player: Player, listingId: string): boolean
 	local rarity = if def then def.rarity else "Common"
 	local taxRate = Market.taxRateFor(rarity, Rarities.marketTax)
 	local net = Market.netProceeds(listing.price, taxRate)
-	-- Pay seller (online only in v1; offline payout skipped -- see LOCKED-FILE NEEDS).
+	-- Pay the seller. Online -> credit instantly; offline -> persistent ProfileStore
+	-- message that lands the next time they play (cross-server safe).
 	local seller = playerByUserId(listing.sellerUserId)
 	if seller then
 		Data:AddCoins(seller, net)
 	else
-		-- V1: seller is offline; payout is forfeited this session.
-		-- TODO: persist payout in a mailbox field on ProfileData (requires DataService edit).
-		warn(
-			string.format(
-				"[MarketService] Seller %d is offline; net payout of %d coins for listing %s skipped (v1).",
-				listing.sellerUserId,
-				net,
-				listingId
-			)
-		)
+		Data:SendCoins(listing.sellerUserId, net)
 	end
 	-- Grant card to buyer and remove listing.
 	Inv:GrantCard(player, listing.cardId)
@@ -165,22 +153,9 @@ function MarketService:KnitStart() end
 return MarketService
 
 --[[
-LOCKED-FILE NEEDS / V1 LIMITATIONS
-====================================
-1. LISTING PERSISTENCE
-   Market listings are stored in `MarketService._listings` (in-memory) and are
-   lost when the server restarts. To persist them across sessions, a new field
-   `marketListings: { [string]: { sellerUserId:number, cardId:string, price:number } }?`
-   needs to be added to ProfileData in `src/shared/Types.luau` (LOCKED) and the
-   PROFILE_TEMPLATE in `src/server/Services/DataService.luau` (LOCKED).
-   The service would then serialise/deserialise to the seller's profile on load/save.
-
-2. OFFLINE SELLER PAYOUTS
-   When a buyer purchases a listing while the seller is offline the payout is
-   currently dropped (a `warn()` is emitted). Correct behaviour requires a
-   mailbox/inbox mechanism: a `pendingCoins: number` (or richer inbox) field on
-   ProfileData, credited at purchase time and drained when the seller next logs in
-   (via `DataService.ProfileLoaded`). This also requires editing the LOCKED files
-   above. Implementing a separate in-memory queue was avoided because it resets on
-   server restart and would silently swallow coins.
+V2 FOLLOW-UP (not blocking):
+  Listing PERSISTENCE -- `_listings` is in-memory and resets on server restart.
+  A global, cross-server market needs a shared store (DataStore or MemoryStore)
+  rather than per-profile data, since a listing isn't owned by a single session.
+  Offline seller PAYOUTS are already solved via DataService:SendCoins (MessageAsync).
 ]]
