@@ -1,0 +1,11 @@
+[package]
+name = "indy/worldcup-brainrot"
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+license = "MIT"
+
+[dependencies]
+Knit = "sleitnick/knit@^1.7.0"
+Promise = "evaera/promise@^4.0.0"
+Signal = "sleitnick/signal@^2.0.0"

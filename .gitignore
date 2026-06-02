@@ -1,0 +1,19 @@
+# Wally packages (regenerated via `wally install`)
+/Packages
+/ServerPackages
+/DevPackages
+
+# Rojo build artifacts
+/sourcemap.json
+*.rbxl
+*.rbxlx
+*.rbxl.lock
+*.rbxlx.lock
+/build.rbxl
+
+# OS / tooling
+.DS_Store
+*.log
+
+# Generated card art before upload (kept out of git; uploaded to Roblox CDN)
+/art-output
