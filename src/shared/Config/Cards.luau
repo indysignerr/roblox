@@ -14,7 +14,9 @@ type CardDef = {
 }
 
 local Cards: { CardDef } = {
-	-- Common
+	-- =========================================================
+	-- COMMON  (~10 cards)  basePower 8-12
+	-- =========================================================
 	{
 		id = "fr_baguette_bombardino",
 		name = "Baguette Bombardino",
@@ -39,8 +41,66 @@ local Cards: { CardDef } = {
 		basePower = 9,
 		imageId = "",
 	},
+	{
+		id = "mx_taco_turbo",
+		name = "Taco Turbo",
+		nation = "Mexique",
+		rarity = "Common",
+		basePower = 8,
+		imageId = "",
+	},
+	{
+		id = "us_hotdog_hooligan",
+		name = "Hotdog Hooligan",
+		nation = "USA",
+		rarity = "Common",
+		basePower = 9,
+		imageId = "",
+	},
+	{
+		id = "ng_jollof_joker",
+		name = "Jollof Joker",
+		nation = "Nigéria",
+		rarity = "Common",
+		basePower = 10,
+		imageId = "",
+	},
+	{
+		id = "cm_ndolé_noodle",
+		name = "Ndolé Noodle",
+		nation = "Cameroun",
+		rarity = "Common",
+		basePower = 8,
+		imageId = "",
+	},
+	{
+		id = "be_waffle_wanderer",
+		name = "Waffle Wanderer",
+		nation = "Belgique",
+		rarity = "Common",
+		basePower = 11,
+		imageId = "",
+	},
+	{
+		id = "uy_mate_marmot",
+		name = "Maté Marmot",
+		nation = "Uruguay",
+		rarity = "Common",
+		basePower = 9,
+		imageId = "",
+	},
+	{
+		id = "gh_kenkey_goblin",
+		name = "Kenkey Goblin",
+		nation = "Ghana",
+		rarity = "Common",
+		basePower = 10,
+		imageId = "",
+	},
 
-	-- Uncommon
+	-- =========================================================
+	-- UNCOMMON  (~9 cards)  basePower 16-20
+	-- =========================================================
 	{
 		id = "ar_mate_tornado",
 		name = "Maté Tornado",
@@ -65,8 +125,58 @@ local Cards: { CardDef } = {
 		basePower = 17,
 		imageId = "",
 	},
+	{
+		id = "kr_kimchi_kicker",
+		name = "Kimchi Kicker",
+		nation = "Corée du Sud",
+		rarity = "Uncommon",
+		basePower = 16,
+		imageId = "",
+	},
+	{
+		id = "ma_couscous_crusader",
+		name = "Couscous Crusader",
+		nation = "Maroc",
+		rarity = "Uncommon",
+		basePower = 18,
+		imageId = "",
+	},
+	{
+		id = "hr_burek_bandit",
+		name = "Burek Bandit",
+		nation = "Croatie",
+		rarity = "Uncommon",
+		basePower = 17,
+		imageId = "",
+	},
+	{
+		id = "sn_thiebou_thunderbolt",
+		name = "Thiebou Thunderbolt",
+		nation = "Sénégal",
+		rarity = "Uncommon",
+		basePower = 20,
+		imageId = "",
+	},
+	{
+		id = "jp_ramen_ronin",
+		name = "Ramen Ronin",
+		nation = "Japon",
+		rarity = "Uncommon",
+		basePower = 16,
+		imageId = "",
+	},
+	{
+		id = "pt_pasteis_palhaço",
+		name = "Pastéis Palhaço",
+		nation = "Portugal",
+		rarity = "Uncommon",
+		basePower = 19,
+		imageId = "",
+	},
 
-	-- Rare
+	-- =========================================================
+	-- RARE  (~8 cards)  basePower 28-34
+	-- =========================================================
 	{
 		id = "es_churro_matador",
 		name = "Churro Matador",
@@ -91,8 +201,50 @@ local Cards: { CardDef } = {
 		basePower = 29,
 		imageId = "",
 	},
+	{
+		id = "us_gridlock_striker",
+		name = "Gridlock Striker",
+		nation = "USA",
+		rarity = "Rare",
+		basePower = 28,
+		imageId = "",
+	},
+	{
+		id = "mx_piñata_predator",
+		name = "Piñata Predator",
+		nation = "Mexique",
+		rarity = "Rare",
+		basePower = 32,
+		imageId = "",
+	},
+	{
+		id = "de_schnitzel_sentinel",
+		name = "Schnitzel Sentinel",
+		nation = "Allemagne",
+		rarity = "Rare",
+		basePower = 34,
+		imageId = "",
+	},
+	{
+		id = "be_frites_phantom",
+		name = "Frites Phantom",
+		nation = "Belgique",
+		rarity = "Rare",
+		basePower = 30,
+		imageId = "",
+	},
+	{
+		id = "uy_asado_assassin",
+		name = "Asado Assassin",
+		nation = "Uruguay",
+		rarity = "Rare",
+		basePower = 33,
+		imageId = "",
+	},
 
-	-- Epic
+	-- =========================================================
+	-- EPIC  (~6 cards)  basePower 46-52
+	-- =========================================================
 	{
 		id = "hr_damier_vortex",
 		name = "Damier Vortex",
@@ -109,8 +261,42 @@ local Cards: { CardDef } = {
 		basePower = 50,
 		imageId = "",
 	},
+	{
+		id = "ar_gaucho_galaxia",
+		name = "Gaucho Galaxia",
+		nation = "Argentine",
+		rarity = "Epic",
+		basePower = 52,
+		imageId = "",
+	},
+	{
+		id = "kr_hanbok_havoc",
+		name = "Hanbok Havoc",
+		nation = "Corée du Sud",
+		rarity = "Epic",
+		basePower = 46,
+		imageId = "",
+	},
+	{
+		id = "it_colosseum_catapult",
+		name = "Colosseum Catapult",
+		nation = "Italie",
+		rarity = "Epic",
+		basePower = 49,
+		imageId = "",
+	},
+	{
+		id = "ng_afrobeat_avalanche",
+		name = "Afrobeat Avalanche",
+		nation = "Nigéria",
+		rarity = "Epic",
+		basePower = 51,
+		imageId = "",
+	},
 
-	-- Legendary
+	-- =========================================================
+	-- LEGENDARY  (~4 cards)  basePower 72-80
+	-- =========================================================
 	{
 		id = "jp_sakura_kaiju",
 		name = "Sakura Kaiju",
@@ -127,8 +313,26 @@ local Cards: { CardDef } = {
 		basePower = 78,
 		imageId = "",
 	},
+	{
+		id = "es_matador_magnifico",
+		name = "Matador Magnífico",
+		nation = "Espagne",
+		rarity = "Legendary",
+		basePower = 72,
+		imageId = "",
+	},
+	{
+		id = "de_blitzkrieg_baron",
+		name = "Blitzkrieg Baron",
+		nation = "Allemagne",
+		rarity = "Legendary",
+		basePower = 80,
+		imageId = "",
+	},
 
-	-- Mythic
+	-- =========================================================
+	-- MYTHIC  (~3 cards)  basePower 105-115
+	-- =========================================================
 	{
 		id = "br_rei_do_caos",
 		name = "Rei do Caos",
@@ -143,6 +347,14 @@ local Cards: { CardDef } = {
 		nation = "France",
 		rarity = "Mythic",
 		basePower = 112,
+		imageId = "",
+	},
+	{
+		id = "ar_dios_del_balon",
+		name = "Dios del Balón",
+		nation = "Argentine",
+		rarity = "Mythic",
+		basePower = 115,
 		imageId = "",
 	},
 }
