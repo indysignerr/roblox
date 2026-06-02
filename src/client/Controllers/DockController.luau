@@ -22,6 +22,7 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local Theme = require(script.Parent.Parent.UI.Theme)
@@ -94,6 +95,8 @@ function DockController:_ensureGui()
 		}),
 	})
 	self._panelHost = panelHost
+	-- Drives the open/close pop (scales about the host's centred anchor).
+	self._hostScale = Components.create("UIScale", { Scale = 1, Parent = panelHost })
 
 	-- Bottom dock of launcher buttons (ZIndex 3 → always above the panel host).
 	local dock = Components.create("Frame", {
@@ -232,6 +235,7 @@ function DockController:Open(id: string)
 	if not entry then
 		return
 	end
+	local wasOpen = self._panelHost.Visible
 	-- Hide any currently-open panel + de-highlight its button.
 	if self._active and self._panels[self._active] then
 		self._panels[self._active].panel.Visible = false
@@ -243,6 +247,19 @@ function DockController:Open(id: string)
 	entry.button.BackgroundColor3 = Theme.color.accent
 	self._panelHost.Visible = true
 	self._backdrop.Visible = true
+
+	-- Fade the backdrop in only on a fresh open; pop the host on every open for feedback.
+	if not wasOpen then
+		self._backdrop.BackgroundTransparency = 1
+		TweenService:Create(self._backdrop, TweenInfo.new(0.18), { BackgroundTransparency = 0.45 })
+			:Play()
+	end
+	self._hostScale.Scale = 0.96
+	TweenService:Create(
+		self._hostScale,
+		TweenInfo.new(0.24, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{ Scale = 1 }
+	):Play()
 
 	if entry.onOpen then
 		local ok, err = pcall(entry.onOpen)
@@ -258,8 +275,16 @@ function DockController:Close()
 		self._panels[self._active].button.BackgroundColor3 = Theme.color.surfaceAlt
 	end
 	self._active = nil
-	self._panelHost.Visible = false
-	self._backdrop.Visible = false
+	TweenService:Create(self._backdrop, TweenInfo.new(0.16), { BackgroundTransparency = 1 }):Play()
+	local collapse = TweenService:Create(self._hostScale, TweenInfo.new(0.16), { Scale = 0.96 })
+	collapse.Completed:Connect(function()
+		-- Skip hiding if the player re-opened during the collapse.
+		if not self._active then
+			self._panelHost.Visible = false
+			self._backdrop.Visible = false
+		end
+	end)
+	collapse:Play()
 end
 
 function DockController:Toggle(id: string)

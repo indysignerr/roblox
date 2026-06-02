@@ -4,6 +4,7 @@
 -- shield countdown locally. Reactivating the shield lives in StealController, not here.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local Theme = require(script.Parent.Parent.UI.Theme)
@@ -13,6 +14,7 @@ local HudController = Knit.CreateController({
 	Name = "HudController",
 	_data = nil, -- latest ProfileData snapshot
 	_coinsLabel = nil,
+	_coinScale = nil, -- UIScale on the coins pill, popped when the balance changes
 	_shieldDot = nil,
 	_shieldLabel = nil,
 })
@@ -74,8 +76,21 @@ local function formatRemaining(seconds: number): string
 end
 
 function HudController:_refreshCoins()
-	if self._data then
-		self._coinsLabel.Text = tostring(self._data.coins or 0)
+	if not self._data then
+		return
+	end
+	local value = tostring(self._data.coins or 0)
+	if self._coinsLabel.Text == value then
+		return
+	end
+	self._coinsLabel.Text = value
+	if self._coinScale then
+		self._coinScale.Scale = 1.18
+		TweenService:Create(
+			self._coinScale,
+			TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+			{ Scale = 1 }
+		):Play()
 	end
 end
 
@@ -121,6 +136,7 @@ function HudController:KnitStart()
 
 	local coins = pill(bar, Theme.color.accent, 1)
 	self._coinsLabel = coins.label
+	self._coinScale = Components.create("UIScale", { Scale = 1, Parent = coins.label.Parent })
 	local shield = pill(bar, Theme.color.stroke, 2)
 	self._shieldDot = shield.dot
 	self._shieldLabel = shield.label
