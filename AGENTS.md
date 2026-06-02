@@ -163,6 +163,30 @@ are fine via `Knit.GetService` when a real dependency exists (e.g. Steal must
 check Shield). Reference sibling service method names from the contracts in
 your task prompt; type them loosely (`:: any`) to avoid coupling the type-check.
 
+### InventoryService contract (STABLE — use it; do NOT reimplement card mutation)
+
+All card grants/consumes go through this so anti-dupe + replication stay in one
+place. Grab it with `local Inv = Knit.GetService("InventoryService")`:
+
+```lua
+Inv:GrantCard(player, cardId)            -- boolean: add one copy (stacks)
+Inv:ConsumeCards(player, cardId, n)      -- boolean: false if not enough copies
+Inv:HasCard(player, cardId, n?)          -- boolean
+Inv:GetCard(player, cardId)              -- OwnedCard? { cardId, count, aura }
+Inv:ConvertDuplicates(player, cardId, keep?) -- number coins (anti-dupe: surplus -> coins)
+```
+
+The pure math behind it is `src/shared/Logic/Inventory.luau`
+(`grant`/`consume`/`has`/`convertDuplicates`) — reuse that in your own pure logic
++ tests when you need to reason about a cards map.
+
+### Catalog (pure) — look up CardDefs
+
+`src/shared/Logic/Catalog.luau` operates on the card list (`Config.Cards`):
+`Catalog.get(cards, id)`, `.byRarity(cards, r)`, `.byNation(cards, n)`,
+`.index(cards)`, `.nations(cards)`. Require `Cards` + `Catalog` and call directly
+(both are pure / present in the base).
+
 ---
 
 ## 4. Config you can rely on (read-only)

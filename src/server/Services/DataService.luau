@@ -41,7 +41,10 @@ local Store = ProfileStore.New("PlayerData_v1", PROFILE_TEMPLATE)
 
 local DataService = Knit.CreateService({
 	Name = "DataService",
-	Client = {},
+	Client = {
+		-- Fired to a single player when their own profile changes (UI re-renders on this).
+		Updated = Knit.CreateSignal(), -- (data: ProfileData)
+	},
 
 	_profiles = {}, -- [Player] = Profile (ProfileStore profile; .Data is the ProfileData)
 })
@@ -53,6 +56,19 @@ DataService.ProfileReleasing = Signal.new() -- (player: Player, data: ProfileDat
 function DataService:GetProfile(player: Player): ProfileData?
 	local profile = self._profiles[player]
 	return if profile then profile.Data else nil
+end
+
+-- Call after mutating a profile so the owning client re-renders.
+function DataService:FireUpdated(player: Player)
+	local profile = self._profiles[player]
+	if profile then
+		self.Client.Updated:Fire(player, profile.Data)
+	end
+end
+
+-- Client read: a player may fetch their own profile (no server secrets live in it).
+function DataService.Client:GetProfile(player: Player): ProfileData?
+	return self.Server:GetProfile(player)
 end
 
 function DataService:GetCoins(player: Player): number
@@ -70,6 +86,7 @@ function DataService:AddCoins(player: Player, amount: number): boolean
 		return false
 	end
 	profile.Data.coins += amount
+	self:FireUpdated(player)
 	return true
 end
 
